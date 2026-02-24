@@ -6,13 +6,13 @@ class RequestParams(BaseModel):
     sort: str
     lang: str
     curr: str
+    dest: str
 
 
 class RequestHeaders(BaseModel):
     user_agent: str = Field(alias="user-agent")
     accept: str
     accept_language: str = Field(alias="accept-language")
-    referer: str
 
     class Config:
         populate_by_name = True

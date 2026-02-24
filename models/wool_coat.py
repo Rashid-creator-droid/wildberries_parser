@@ -9,22 +9,30 @@ class Characteristic(BaseModel):
     name: str
     value: str
 
+class Price(BaseModel):
+    basic: int
+    product: int
+    logistics: int
+    return_: int
+
 
 class Size(BaseModel):
     name: str
-    stock: int
+    origName: str
+    wh: int
+    price: Price
 
 
 class WoolCoat(BaseModel):
+    id: int
     url: str
-    article: int
     name: str
-    price: int
-    description: str
+    price: int 
+    description: str | None = None
     img_urls: List[str]
     characteristics: List[Characteristic]
     seller: Seller
-    sizes: List[str]
+    sizes: List[Size]
     total_stock: int
-    rating: float | None
-    eviews_count: int
+    rating: float | None = None
+    reviews_count: int
