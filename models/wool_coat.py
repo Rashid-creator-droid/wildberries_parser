@@ -1,8 +1,8 @@
-from typing import List, Optional
+from typing import List
 
 from pydantic import BaseModel
 
-from .seller import Seller
+from models.seller import Seller
 
 
 class Characteristic(BaseModel):
@@ -26,5 +26,5 @@ class WoolCoat(BaseModel):
     seller: Seller
     sizes: List[str]
     total_stock: int
-    rating: Optional[float]
+    rating: float | None
     eviews_count: int
