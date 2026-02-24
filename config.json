@@ -1,0 +1,27 @@
+{
+  "base_url": "https://www.wildberries.ru",
+  "search": {
+    "query": "пальто из натуральной шерсти",
+    "filters": {
+      "rating_min": 4,
+      "rating_max": 5,
+      "price_min": 0,
+      "price_max": 1000000,
+      "country": "Россия"
+    }
+  },
+  "request": {
+    "params": {
+      "resultset": "catalog",
+      "sort": "popular",
+      "lang": "ru",
+      "curr": "rub"
+    },
+    "headers": {
+      "user-agent": "Mozilla/5.0",
+      "accept": "application/json",
+      "accept-language": "ru-RU,ru;q=0.9",
+      "referer": "https://www.wildberries.ru/"
+    }
+  }
+}
