@@ -19,5 +19,5 @@ class RequestHeaders(BaseModel):
 
 
 class RequestConfig(BaseModel):
-    params: RequestParams
+    params: RequestParams | None = None
     headers: RequestHeaders
