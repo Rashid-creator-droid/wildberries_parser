@@ -1,5 +1,4 @@
 import math
-from typing import List
 
 import asyncio                     
 import httpx                       
@@ -17,7 +16,15 @@ class Parser:
         self.config = config
         self.url_gen = ProductURLGenerator(config)
         self.convert_currency = CurrencyConverter
-        self.cookies = COOKIES
+        self.semaphore = asyncio.Semaphore(10)
+        self.client = httpx.AsyncClient(
+            cookies=COOKIES,
+            headers=config.request.headers.model_dump(by_alias=True),
+            timeout=20,
+        )
+    
+    async def close(self):
+        await self.client.aclose()
 
     async def _fetch_page(
         self,
@@ -37,17 +44,12 @@ class Parser:
             if filters:
                 params.update(self.config.filters.model_dump())
 
-        headers = self.config.request.headers.model_dump(by_alias=True)
-
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                url=base_url,
-                params=params,
-                cookies=self.cookies,
-                headers=headers,
-            )
-            response.raise_for_status()
-            return response.json()
+        response = await self.client.get(
+            url=base_url,
+            params=params,
+        )
+        response.raise_for_status()
+        return response.json()
 
     async def get_total_items(self, use_filters: bool = False) -> int:
         url = self.url_gen.generate_base_search_url()
@@ -75,69 +77,74 @@ class Parser:
         data = await self._fetch_page(base_url=seller_url)
         return Seller.model_validate(data)
 
-    async def process_product(self, product) -> dict:
-        first_size = product.sizes[0]
-        product_card = await self.fetch_product_card(product.id)
-        seller = await self.fetch_seller_info(
-            product_card.selling.supplier_id
-        )
+    async def process_product(self, product, use_filters) -> dict:
 
-        image_count = product_card.media.photo_count
-        convert_to_rub = self.convert_currency.convert_rub_cop
-        return {
-            "article": product.id,
-            "name": product.name,
-            "product_url": self.url_gen.generate_product_page_url(product.id),
-            "price_basic": convert_to_rub(first_size.price.basic),
-            "price_sale": convert_to_rub(first_size.price.product),
-            "description": product_card.description,
-            "images": ", ".join(
-                self.url_gen.generate_product_image_url(product.id, i)
-                for i in range(1, image_count + 1)
-            ),
-            "options": str(product_card.options),
-            "seller_name": seller.seller_name,
-            "seller_url": self.url_gen.generate_seller_url(
-                seller.supplier_id
-            ),
-            "sizes": ", ".join(s.name for s in product.sizes),
-            "quantity": product.totalQuantity,
-            "rating": product.review_rating,
-            "feedbacks": product.feedbacks,
-        }
+        if use_filters:
+            filter = self.config.filters
 
-    async def fetch_all_products(
+            if product.review_rating is None or product.review_rating < filter.rating_min:
+                return None
+            if product.review_rating is None or product.review_rating > filter.rating_max:
+                return None
+        
+        async with self.semaphore:
+            first_size = product.sizes[0]
+            product_card = await self.fetch_product_card(product.id)
+            seller = await self.fetch_seller_info(
+                product_card.selling.supplier_id
+            )
+
+            image_count = product_card.media.photo_count
+            convert_to_rub = self.convert_currency.convert_rub_cop
+            return {
+                "article": product.id,
+                "name": product.name,
+                "product_url": self.url_gen.generate_product_page_url(product.id),
+                "price_basic": convert_to_rub(first_size.price.basic),
+                "price_sale": convert_to_rub(first_size.price.product),
+                "description": product_card.description,
+                "images": ", ".join(
+                    self.url_gen.generate_product_image_url(product.id, i)
+                    for i in range(1, image_count + 1)
+                ),
+                "options": str(product_card.options),
+                "seller_name": seller.seller_name,
+                "seller_url": self.url_gen.generate_seller_url(
+                    seller.supplier_id
+                ),
+                "sizes": ", ".join(s.name for s in product.sizes),
+                "quantity": product.totalQuantity,
+                "rating": product.review_rating,
+                "feedbacks": product.feedbacks,
+            }
+
+    async def iter_products(
         self,
         limit_pages: int | None = None,
         limit_per_page: int | None = None,
         use_filters: bool = False,
-    ) -> List[dict]:
+    ):
+
         total_items = await self.get_total_items(use_filters=use_filters)
-
-        all_products: List[dict] = []
-
         total_pages = math.ceil(total_items / PER_PAGE)
-
         if limit_pages and total_pages >= limit_pages:
             total_pages = limit_pages
 
-        for page in range(0, total_pages):
+        for page in range(1, total_pages + 1):
             page_data = await self.fetch_card_list_page(
                 page=page, use_filters=use_filters
             )
             products = page_data.products
-
             if limit_per_page:
                 products = products[:limit_per_page]
 
-            tasks = [self.process_product(p) for p in products]
-            results = await asyncio.gather(*tasks)
+            tasks = [
+                self.process_product(product=product, use_filters=use_filters)
+                for product in products
+            ]
+            results = await asyncio.gather(*tasks, return_exceptions=True)
 
-            for product_dict in results:
-                print(
-                    f"Processing product {product_dict['article']}: "
-                    f"{product_dict['name']}"
-                )
-            all_products.extend(results)
-
-        return all_products
+            for result in results:
+                if result is None or isinstance(result, Exception):
+                    continue
+                yield result
