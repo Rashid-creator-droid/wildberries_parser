@@ -1,13 +1,13 @@
 import argparse
+import asyncio
+from tqdm.asyncio import tqdm_asyncio  # pip install tqdm
 
 from core.data_loader import DataLoader
 from core.exporter import Exporter
 from services.parser import Parser
 
-import asyncio
 
-
-async def main(limit_per_page: int, limit_pages: int, use_filters: bool):
+async def main(limit_per_page: int | None, limit_pages: int | None, use_filters: bool):
     config = DataLoader().get_config()
     parser = Parser(config)
     exporter = Exporter("wildberries_products.xlsx")
@@ -15,24 +15,29 @@ async def main(limit_per_page: int, limit_pages: int, use_filters: bool):
     total_saved = 0
 
     try:
-        async for prod in parser.iter_products(
+        total_items = await parser.get_total_items(use_filters=use_filters)
+
+        async for prod in tqdm_asyncio(parser.iter_products(
             limit_per_page=limit_per_page,
             limit_pages=limit_pages,
             use_filters=use_filters
-        ):
+        ), total=total_items, desc="Parsing products"):
             total_saved += 1
             batch.append(prod)
-            print(f"Processing product {prod['article']}: {prod['name']}")
 
             if len(batch) >= 50:
                 await exporter.append_batch_async(batch)
+                batch.clear()
+
         if batch:
             await exporter.append_batch_async(batch)
 
     finally:
         await parser.close()
-
-    print(f"загружено {total_saved} товаров")
+    if use_filters:
+        print(f"\nТоваров прошедших фильтрацию - {total_saved} из {total_items} загружено")
+    else:
+        print(f"\nЗагружено {total_saved} товаров")
 
 
 if __name__ == "__main__":
