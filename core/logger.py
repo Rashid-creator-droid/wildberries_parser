@@ -21,7 +21,9 @@ class Logger:
         if not cls._logger.handlers:
             cls._logger.setLevel(logging.DEBUG)
 
-            file_handler = logging.FileHandler(LOGGER_PATH, mode="a", encoding="utf-8")
+            file_handler = logging.FileHandler(
+                LOGGER_PATH, mode="a", encoding="utf-8"
+            )
             file_handler.setLevel(logging.INFO)
             file_handler.setFormatter(
                 logging.Formatter(
@@ -76,7 +78,9 @@ class Logger:
         try:
             yield
         except Exception:
-            cls._log(cls.get_logger().error, f"=== STEP FAILED: {description} ===")
+            cls._log(
+                cls.get_logger().error, f"=== STEP FAILED: {description} ==="
+            )
             raise
         finally:
             cls._indent_level -= 1

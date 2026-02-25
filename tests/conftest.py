@@ -18,9 +18,7 @@ class DummyConfig:
         )
         self.search = SimpleNamespace(model_dump=lambda **kw: {})
         self.filters = SimpleNamespace(
-            model_dump=lambda **kw: {},
-            rating_min=0,
-            rating_max=5
+            model_dump=lambda **kw: {}, rating_min=0, rating_max=5
         )
 
 

@@ -5,24 +5,31 @@ from tqdm.asyncio import tqdm_asyncio
 from core.data_loader import DataLoader
 from core.exporter import Exporter
 from services.parser import Parser
-from models.filter import Filters, SearchConfig
 
 
-async def main(limit_per_page: int | None, limit_pages: int | None, use_filters: bool):
+async def main(
+    limit_per_page: int | None, limit_pages: int | None, use_filters: bool
+):
     config = DataLoader().get_config()
     parser = Parser(config)
-    exporter = Exporter(filters=config.filters if use_filters else None, search=config.search)
+    exporter = Exporter(
+        filters=config.filters if use_filters else None, search=config.search
+    )
     batch: list[dict] = []
     total_saved = 0
 
     try:
         total_items = await parser.get_total_items(use_filters=use_filters)
 
-        async for prod in tqdm_asyncio(parser.iter_products(
-            limit_per_page=limit_per_page,
-            limit_pages=limit_pages,
-            use_filters=use_filters
-        ), total=total_items, desc="Parsing products"):
+        async for prod in tqdm_asyncio(
+            parser.iter_products(
+                limit_per_page=limit_per_page,
+                limit_pages=limit_pages,
+                use_filters=use_filters,
+            ),
+            total=total_items,
+            desc="Parsing products",
+        ):
             total_saved += 1
             batch.append(prod)
 
@@ -36,7 +43,9 @@ async def main(limit_per_page: int | None, limit_pages: int | None, use_filters:
     finally:
         await parser.close()
     if use_filters:
-        print(f"\nТоваров прошедших фильтрацию - {total_saved} из {total_items} загружено")
+        print(
+            f"\nТоваров прошедших фильтрацию - {total_saved} из {total_items} загружено"
+        )
     else:
         print(f"\nЗагружено {total_saved} товаров")
 

@@ -25,7 +25,7 @@ class Parser:
             timeout=20,
             proxy=PROXY_URL or None,
         )
-        
+
     async def close(self):
         await self.client.aclose()
 
@@ -46,7 +46,9 @@ class Parser:
                 "page": page,
             }
             if filters:
-                Logger.info(f"Использование фильтров для запроса {base_url} page={page}")
+                Logger.info(
+                    f"Использование фильтров для запроса {base_url} page={page}"
+                )
                 params.update(self.config.filters.model_dump())
 
         response = await self.client.get(
@@ -72,7 +74,9 @@ class Parser:
         data = await self._fetch_page(
             page=page, base_url=url, use_params=True, filters=use_filters
         )
-        Logger.info(f"Получено {len(data.get('products', []))} товаров на странице {page}")
+        Logger.info(
+            f"Получено {len(data.get('products', []))} товаров на странице {page}"
+        )
         return ProductList.model_validate(data)
 
     async def fetch_product_card(self, product_id: int) -> ProductCard:
@@ -93,12 +97,18 @@ class Parser:
             filter_ = self.config.filters
             if product.review_rating is None:
                 return None
-            if not (filter_.rating_min <= product.review_rating <= filter_.rating_max):
+            if not (
+                filter_.rating_min
+                <= product.review_rating
+                <= filter_.rating_max
+            ):
                 return None
 
         async with self.semaphore:
             product_card = await self.fetch_product_card(product.id)
-            seller = await self.fetch_seller_info(product_card.selling.supplier_id)
+            seller = await self.fetch_seller_info(
+                product_card.selling.supplier_id
+            )
             return build_product_dict(
                 product,
                 product_card,
@@ -118,7 +128,9 @@ class Parser:
         total_pages = math.ceil(total_items / PER_PAGE)
 
         if limit_pages and total_pages >= limit_pages:
-            Logger.info(f"Ограничение количества страниц: {limit_pages} из {total_pages}")
+            Logger.info(
+                f"Ограничение количества страниц: {limit_pages} из {total_pages}"
+            )
             total_pages = limit_pages
 
         for page in range(1, total_pages + 1):
@@ -128,11 +140,15 @@ class Parser:
                 )
                 products = page_data.products
                 if limit_per_page:
-                    Logger.info(f"Ограничение количества товаров на странице: {limit_per_page} из {len(products)}")
+                    Logger.info(
+                        f"Ограничение количества товаров на странице: {limit_per_page} из {len(products)}"
+                    )
                     products = products[:limit_per_page]
 
                 tasks = [
-                    self.process_product(product=product, use_filters=use_filters)
+                    self.process_product(
+                        product=product, use_filters=use_filters
+                    )
                     for product in products
                 ]
                 results = await asyncio.gather(*tasks, return_exceptions=True)

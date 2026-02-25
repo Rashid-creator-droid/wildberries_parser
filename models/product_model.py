@@ -46,10 +46,16 @@ class ProductCard(BaseModel):
     media: ProductPhoto | None = None
     selling: SellerID | None = None
 
-
     def simple_options(self) -> list[dict]:
         result = []
-        fields = ["name", "value", "charc_type", "is_variable", "variable_value_IDs", "variable_values"]
+        fields = [
+            "name",
+            "value",
+            "charc_type",
+            "is_variable",
+            "variable_value_IDs",
+            "variable_values",
+        ]
         if not self.options:
             return result
 

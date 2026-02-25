@@ -10,12 +10,17 @@ from models.filter import Filters
 
 
 class Exporter:
-    def __init__(self, filters: Filters | None = None, search: SearchConfig | None = None, base_name: str = "products.xlsx"):
+    def __init__(
+        self,
+        filters: Filters | None = None,
+        search: SearchConfig | None = None,
+        base_name: str = "products.xlsx",
+    ):
         self.filters = filters
         self.search = search
         self.base_name = base_name
         self.filename = self._generate_filename()
-    
+
     def _generate_filename(self) -> Path:
         parts = ["parse"]
 
@@ -23,11 +28,12 @@ class Exporter:
             parts.append(self.search.query.replace(" ", "_"))
 
         if self.filters:
-            parts.append(f"{self.filters.rating_min}-{self.filters.rating_max}")
+            parts.append(
+                f"{self.filters.rating_min}-{self.filters.rating_max}"
+            )
             parts.append(f"{self.filters.price_min}-{self.filters.price_max}")
             if self.filters.country:
                 parts.append(f"{self.filters.country.name}")
-
 
         filename_stem = "_".join(parts)
         filename = Path(f"{filename_stem}.xlsx")
