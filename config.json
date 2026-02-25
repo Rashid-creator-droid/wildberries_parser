@@ -9,14 +9,14 @@
   "seller_url_template": "https://static-basket-01.wbbasket.ru/vol0/data/supplier-by-id/{supplier_id}.json",
 
   "search": {
-    "query": "пальто из натуральной шерсти",
-    "filters": {
-      "rating_min": null,
-      "rating_max": null,
-      "price_min": null,
-      "price_max": null,
-      "country": null
-    }
+    "query": "пальто из натуральной шерсти"},
+
+  "filters": {
+    "rating_min": 0,
+    "rating_max": 5,
+    "price_min": 0,
+    "price_max": 2000,
+    "country": "RUSSIA"
   },
 
   "request": {
