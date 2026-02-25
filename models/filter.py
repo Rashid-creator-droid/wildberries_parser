@@ -4,8 +4,8 @@ from enums.country import CountryEnum
 
 
 class Filters(BaseModel):
-    rating_min: int | None = Field(0, ge=0, le=5)
-    rating_max: int | None = Field(5, ge=0, le=5)
+    rating_min: float | None = Field(0, ge=0, le=5)
+    rating_max: float | None = Field(5, ge=0, le=5)
 
     price_min: int | None = Field(0, ge=0)
     price_max: int | None = Field(1_000_000, ge=0)
