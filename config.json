@@ -15,7 +15,7 @@
     "rating_min": 0,
     "rating_max": 5,
     "price_min": 0,
-    "price_max": 2000,
+    "price_max": 20000000,
     "country": "RUSSIA"
   },
 
