@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  wildberries-parser:
+    build: .
+    container_name: wildberries_parser
+    
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      - LOGGER_PATH=/app/logs/parser.log
+      - PYTHONUNBUFFERED=1
