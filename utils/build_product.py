@@ -1,9 +1,12 @@
+from core.logger import Logger
 from models.product_model import ProductCard
 from models.seller import Seller
 from services.url_product_generate import ProductURLGenerator
 
 
 def build_product_dict(product, product_card: ProductCard, seller: Seller, url_gen: ProductURLGenerator, convert_currency) -> dict:
+    Logger.debug(f"Создание товара id={product.id}")
+    
     first_size = product.sizes[0]
     image_count = product_card.media.photo_count
 

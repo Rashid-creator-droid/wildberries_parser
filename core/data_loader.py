@@ -4,6 +4,7 @@ from typing import Optional
 
 from pydantic import TypeAdapter
 
+from core.logger import Logger
 from core.settings import CONFIG_PATH
 from models.main_config import AppConfig
 
@@ -19,6 +20,7 @@ class DataLoader:
 
     @staticmethod
     def _read_json(path):
+        Logger.debug(f"Загрузка данных из файла {path}")
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
         return data

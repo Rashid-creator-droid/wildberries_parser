@@ -1,3 +1,6 @@
+from core.logger import Logger
+
+
 def get_basket_id(nm_id: int) -> str:
     s = nm_id // 100_000
 
@@ -44,4 +47,6 @@ def get_basket_id(nm_id: int) -> str:
         (9605, "40"),
     ]
 
-    return next((basket for max_s, basket in basketst if s <= max_s), "41")
+    result = next((basket for max_s, basket in basketst if s <= max_s), "41")
+    Logger.debug(f"Днс сервер для товара: {nm_id} -> {result}")
+    return result

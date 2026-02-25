@@ -4,13 +4,15 @@ import pandas as pd
 import asyncio
 import gc
 
+from core.logger import Logger
+
 
 class Exporter:
     def __init__(self, filename: str = "products.xlsx"):
         self.filename = Path(filename)
 
     def append_batch(self, products: List[Dict[str, Any]]):
-
+        Logger.debug(f"append_batch, {len(products)} записей")
         if not products:
             return
 
