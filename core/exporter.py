@@ -5,11 +5,40 @@ import asyncio
 import gc
 
 from core.logger import Logger
+from models.main_config import SearchConfig
+from models.filter import Filters
 
 
 class Exporter:
-    def __init__(self, filename: str = "products.xlsx"):
-        self.filename = Path(filename)
+    def __init__(self, filters: Filters | None = None, search: SearchConfig | None = None, base_name: str = "products.xlsx"):
+        self.filters = filters
+        self.search = search
+        self.base_name = base_name
+        self.filename = self._generate_filename()
+    
+    def _generate_filename(self) -> Path:
+        parts = ["parse"]
+
+        if self.search and self.search.query:
+            parts.append(self.search.query.replace(" ", "_"))
+
+        if self.filters:
+            parts.append(f"{self.filters.rating_min}-{self.filters.rating_max}")
+            parts.append(f"{self.filters.price_min}-{self.filters.price_max}")
+            if self.filters.country:
+                parts.append(f"{self.filters.country.name}")
+
+
+        filename_stem = "_".join(parts)
+        filename = Path(f"{filename_stem}.xlsx")
+
+        counter = 1
+        while filename.exists():
+            filename = Path(f"{filename_stem}_{counter}.xlsx")
+            counter += 1
+
+        Logger.info(f"Файл для сохранения: {filename.name}")
+        return filename
 
     def append_batch(self, products: List[Dict[str, Any]]):
         Logger.debug(f"append_batch, {len(products)} записей")
@@ -33,6 +62,7 @@ class Exporter:
                 header = True
 
             df.to_excel(writer, index=False, header=header, startrow=startrow)
+
         products.clear()
         del df
         gc.collect()

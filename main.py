@@ -1,16 +1,17 @@
 import argparse
 import asyncio
-from tqdm.asyncio import tqdm_asyncio  # pip install tqdm
+from tqdm.asyncio import tqdm_asyncio
 
 from core.data_loader import DataLoader
 from core.exporter import Exporter
 from services.parser import Parser
+from models.filter import Filters, SearchConfig
 
 
 async def main(limit_per_page: int | None, limit_pages: int | None, use_filters: bool):
     config = DataLoader().get_config()
     parser = Parser(config)
-    exporter = Exporter("wildberries_products.xlsx")
+    exporter = Exporter(filters=config.filters if use_filters else None, search=config.search)
     batch: list[dict] = []
     total_saved = 0
 
