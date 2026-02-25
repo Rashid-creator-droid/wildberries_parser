@@ -3,11 +3,12 @@ import math
 import asyncio
 import httpx
 
-from core.settings import PER_PAGE, COOKIES
+from core.settings import PER_PAGE, COOKIES, PROXY_URL
 from models.main_config import AppConfig
 from models.product_model import ProductList, ProductCard
 from models.seller import Seller
 from services.url_product_generate import ProductURLGenerator
+from utils.build_product import build_product_dict
 from utils.price import CurrencyConverter
 
 
@@ -21,8 +22,9 @@ class Parser:
             cookies=COOKIES,
             headers=config.request.headers.model_dump(by_alias=True),
             timeout=20,
+            proxies=PROXY_URL or None,
         )
-
+        
     async def close(self):
         await self.client.aclose()
 
@@ -78,53 +80,23 @@ class Parser:
         return Seller.model_validate(data)
 
     async def process_product(self, product, use_filters) -> dict:
-
         if use_filters:
-            filter = self.config.filters
-
-            if (
-                product.review_rating is None
-                or product.review_rating < filter.rating_min
-            ):
+            filter_ = self.config.filters
+            if product.review_rating is None:
                 return None
-            if (
-                product.review_rating is None
-                or product.review_rating > filter.rating_max
-            ):
+            if not (filter_.rating_min <= product.review_rating <= filter_.rating_max):
                 return None
 
         async with self.semaphore:
-            first_size = product.sizes[0]
             product_card = await self.fetch_product_card(product.id)
-            seller = await self.fetch_seller_info(
-                product_card.selling.supplier_id
+            seller = await self.fetch_seller_info(product_card.selling.supplier_id)
+            return build_product_dict(
+                product,
+                product_card,
+                seller,
+                self.url_gen,
+                self.convert_currency,
             )
-
-            image_count = product_card.media.photo_count
-            convert_to_rub = self.convert_currency.convert_rub_cop
-            return {
-                "article": product.id,
-                "name": product.name,
-                "product_url": self.url_gen.generate_product_page_url(
-                    product.id,
-                ),
-                "price_basic": convert_to_rub(first_size.price.basic),
-                "price_sale": convert_to_rub(first_size.price.product),
-                "description": product_card.description,
-                "images": ", ".join(
-                    self.url_gen.generate_product_image_url(product.id, i)
-                    for i in range(1, image_count + 1)
-                ),
-                "options": str(product_card.options),
-                "seller_name": seller.seller_name,
-                "seller_url": self.url_gen.generate_seller_url(
-                    seller.supplier_id
-                ),
-                "sizes": ", ".join(s.name for s in product.sizes),
-                "quantity": product.totalQuantity,
-                "rating": product.review_rating,
-                "feedbacks": product.feedbacks,
-            }
 
     async def iter_products(
         self,

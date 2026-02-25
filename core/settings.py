@@ -10,4 +10,6 @@ CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 wb_cookie = os.getenv("WB_COOKIE")
 COOKIES = {"x_wbaas_token": wb_cookie}
 
+PROXY_URL = os.getenv("PROXY_URL")
+
 PER_PAGE = 100
