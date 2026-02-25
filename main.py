@@ -4,6 +4,7 @@ from services.parser import Parser
 
 import asyncio
 
+
 async def main():
     config = DataLoader().get_config()
     parser = Parser(config)

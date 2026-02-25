@@ -1,4 +1,4 @@
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel
 
 from models.filter import Filters, SearchConfig
 from models.request import RequestConfig

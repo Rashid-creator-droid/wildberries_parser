@@ -1,7 +1,7 @@
 import math
 
-import asyncio                     
-import httpx                       
+import asyncio
+import httpx
 
 from core.settings import PER_PAGE, COOKIES
 from models.main_config import AppConfig
@@ -22,7 +22,7 @@ class Parser:
             headers=config.request.headers.model_dump(by_alias=True),
             timeout=20,
         )
-    
+
     async def close(self):
         await self.client.aclose()
 
@@ -82,11 +82,17 @@ class Parser:
         if use_filters:
             filter = self.config.filters
 
-            if product.review_rating is None or product.review_rating < filter.rating_min:
+            if (
+                product.review_rating is None
+                or product.review_rating < filter.rating_min
+            ):
                 return None
-            if product.review_rating is None or product.review_rating > filter.rating_max:
+            if (
+                product.review_rating is None
+                or product.review_rating > filter.rating_max
+            ):
                 return None
-        
+
         async with self.semaphore:
             first_size = product.sizes[0]
             product_card = await self.fetch_product_card(product.id)
@@ -99,7 +105,9 @@ class Parser:
             return {
                 "article": product.id,
                 "name": product.name,
-                "product_url": self.url_gen.generate_product_page_url(product.id),
+                "product_url": self.url_gen.generate_product_page_url(
+                    product.id,
+                ),
                 "price_basic": convert_to_rub(first_size.price.basic),
                 "price_sale": convert_to_rub(first_size.price.product),
                 "description": product_card.description,

@@ -7,7 +7,9 @@ class SellerID(BaseModel):
 
 class Seller(BaseModel):
     trademark: str | None = None
-    supplier_full_name: str | None = Field(default=None, alias="supplierFullName")
+    supplier_full_name: str | None = Field(
+        default=None, alias="supplierFullName"
+    )
     supplier_id: int | None = Field(default=None, alias="supplierId")
 
     @property

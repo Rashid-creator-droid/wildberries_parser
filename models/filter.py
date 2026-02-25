@@ -11,7 +11,7 @@ class Filters(BaseModel):
     price_max: int | None = Field(1_000_000, ge=0)
 
     country: CountryEnum | None = None
-    
+
     @field_validator("country", mode="before")
     @classmethod
     def parse_country(cls, v):

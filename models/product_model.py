@@ -4,7 +4,6 @@ from typing import List
 from models.seller import SellerID
 
 
-
 class Price(BaseModel):
     basic: int | None = None
     product: int | None = None
