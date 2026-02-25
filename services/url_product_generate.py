@@ -1,4 +1,4 @@
-from services.basket_id import get_basket_id
+from utils.basket_id import get_basket_id
 from urllib.parse import urljoin
 
 
