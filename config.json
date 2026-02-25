@@ -1,7 +1,13 @@
 {
-  "base_api_url": "https://www.wildberries.ru/__internal/u-search/exactmatch/ru/common/v18/search",
-  "product_url_template": "https://www.wildberries.ru/catalog/{product_id}/detail.aspx",
-  "product_card_api_template": "https://basket-{basket_id}.wbbasket.ru/vol{vol}/part{part}/{product_id}/info/ru/card.json",
+  "base_url": "https://www.wildberries.ru/",
+  "products_api_url": "__internal/u-search/exactmatch/ru/common/v18/search",
+  "product_url_template": "catalog/{product_id}/detail.aspx",
+  "product_base_api_template": "https://basket-{basket_id}.wbbasket.ru/vol{vol}/part{part}/{product_id}/",
+  "product_api_prefix": "info/ru/card.json",
+  "image_url_prefix": "images/big/{image_number}.webp",
+  "seller_url_prefix": "seller/{supplier_id}",
+  "seller_url_template": "https://static-basket-01.wbbasket.ru/vol0/data/supplier-by-id/{supplier_id}.json",
+
   "search": {
     "query": "пальто из натуральной шерсти",
     "filters": {

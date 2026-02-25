@@ -1,6 +1,14 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+
+class SellerID(BaseModel):
+    supplier_id: int
 
 
 class Seller(BaseModel):
-    name: str
-    url: str | None
+    trademark: str | None = None
+    supplier_full_name: str | None = Field(default=None, alias="supplierFullName")
+
+    @property
+    def seller_name(self) -> str:
+        return self.trademark or self.supplier_full_name or "Not found"
