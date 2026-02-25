@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import List, Dict, Any
 import pandas as pd
@@ -5,6 +6,7 @@ import asyncio
 import gc
 
 from core.logger import Logger
+from core.settings import PRODUCT_PARSE_DATA_DIR
 from models.main_config import SearchConfig
 from models.filter import Filters
 
@@ -21,6 +23,8 @@ class Exporter:
         self.base_name = base_name
         self.filename = self._generate_filename()
 
+        os.makedirs(PRODUCT_PARSE_DATA_DIR, exist_ok=True)
+
     def _generate_filename(self) -> Path:
         parts = ["parse"]
 
@@ -34,13 +38,16 @@ class Exporter:
             parts.append(f"{self.filters.price_min}-{self.filters.price_max}")
             if self.filters.country:
                 parts.append(f"{self.filters.country.name}")
+        
+        output_dir = Path(PRODUCT_PARSE_DATA_DIR)
+
 
         filename_stem = "_".join(parts)
-        filename = Path(f"{filename_stem}.xlsx")
+        filename = output_dir / f"{filename_stem}.xlsx"
 
         counter = 1
         while filename.exists():
-            filename = Path(f"{filename_stem}_{counter}.xlsx")
+            filename = output_dir / f"{filename_stem}_{counter}.xlsx"
             counter += 1
 
         Logger.info(f"Файл для сохранения: {filename.name}")
