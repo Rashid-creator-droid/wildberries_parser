@@ -13,5 +13,5 @@ class Seller(BaseModel):
     supplier_id: int | None = Field(default=None, alias="supplierId")
 
     @property
-    def seller_name(self) -> str:
-        return self.trademark or self.supplier_full_name or "Not found"
+    def seller_name(self) -> str | None:
+        return self.trademark or self.supplier_full_name or None
