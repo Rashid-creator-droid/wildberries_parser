@@ -21,7 +21,7 @@ def build_product_dict(product, product_card: ProductCard, seller: Seller, url_g
             url_gen.generate_product_image_url(product.id, i)
             for i in range(1, image_count + 1)
         ),
-        "options": str(product_card.options),
+        "options": product_card.simple_options(),
         "seller_name": seller.seller_name,
         "seller_url": url_gen.generate_seller_url(seller.supplier_id),
         "sizes": ", ".join(s.name for s in product.sizes),

@@ -40,13 +40,13 @@ if __name__ == "__main__":
     parser_cli.add_argument(
         "--limit-per-page",
         type=int,
-        default=50,
+        default=None,
         help="Максимальное количество товаров на странице",
     )
     parser_cli.add_argument(
         "--limit-pages",
         type=int,
-        default=1,
+        default=None,
         help="Максимальное количество страниц для парсинга",
     )
     parser_cli.add_argument(
