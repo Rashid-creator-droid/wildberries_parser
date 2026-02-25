@@ -1,3 +1,5 @@
+import argparse
+
 from core.data_loader import DataLoader
 from core.exporter import Exporter
 from services.parser import Parser
@@ -5,7 +7,7 @@ from services.parser import Parser
 import asyncio
 
 
-async def main():
+async def main(limit_per_page: int, limit_pages: int, use_filters: bool):
     config = DataLoader().get_config()
     parser = Parser(config)
     exporter = Exporter("wildberries_products.xlsx")
@@ -14,7 +16,9 @@ async def main():
 
     try:
         async for prod in parser.iter_products(
-            limit_per_page=87, limit_pages=1, use_filters=False
+            limit_per_page=limit_per_page,
+            limit_pages=limit_pages,
+            use_filters=use_filters
         ):
             total_saved += 1
             batch.append(prod)
@@ -32,4 +36,31 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    parser_cli = argparse.ArgumentParser(description="Wildberries Parser")
+    parser_cli.add_argument(
+        "--limit-per-page",
+        type=int,
+        default=50,
+        help="Максимальное количество товаров на странице",
+    )
+    parser_cli.add_argument(
+        "--limit-pages",
+        type=int,
+        default=1,
+        help="Максимальное количество страниц для парсинга",
+    )
+    parser_cli.add_argument(
+        "--use-filters",
+        action="store_true",
+        help="Применять фильтры (rating, price и т.д.)",
+    )
+
+    args = parser_cli.parse_args()
+
+    asyncio.run(
+        main(
+            limit_per_page=args.limit_per_page,
+            limit_pages=args.limit_pages,
+            use_filters=args.use_filters,
+        )
+    )
