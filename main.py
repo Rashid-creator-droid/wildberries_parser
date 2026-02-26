@@ -5,6 +5,7 @@ from tqdm.asyncio import tqdm_asyncio
 from core.data_loader import DataLoader
 from core.exporter import Exporter
 from services.parser import Parser
+from utils.report import print_result
 
 
 async def main(
@@ -42,12 +43,12 @@ async def main(
 
     finally:
         await parser.close()
-    if use_filters:
-        print(
-            f"\nТоваров прошедших фильтрацию - {total_saved} из {total_items} загружено"
-        )
-    else:
-        print(f"\nЗагружено {total_saved} товаров")
+    
+    print_result(
+        total_saved=total_saved,
+        total_items=total_items,
+        use_filters=use_filters,
+    )
 
 
 if __name__ == "__main__":
